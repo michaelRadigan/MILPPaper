@@ -8,5 +8,7 @@ pynauty=`ls | grep pynauty`
 cd $pynauty
 x=../$nauty
 echo $x
-ln -s ../$nauty nauty
+mv ../$nauty nauty
+make user-ins
 make pynauty
+make tests
