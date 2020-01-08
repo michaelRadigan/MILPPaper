@@ -192,36 +192,6 @@ class TestLinearProblem(TestCase):
         # TODO: Think about why the constraint orbits has changed?
         self.assertEqual(symmetries[0:512][1], enlight16WithConstraints[0:512])
 
-    def test_superposedSymmetriesConstraintMatrix(self):
-        row =    np.array([0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6])
-        column = np.array([0, 1, 0, 2, 0, 3, 1, 4, 1, 5, 2, 3, 4, 5])
-        data =   np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2])
-
-        A = sparse.coo_matrix((data, (row, column)), shape=(7, 6))
-
-        pickledProblem = pickle.load(open("pickle/enlight16.p", "rb"))
-        linProblem = LinearProblem(pickledProblem.Aeq.tocoo(),
-                                   pickledProblem.Aineq.tocoo(),
-                                   pickledProblem.beq,
-                                   pickledProblem.bineq,
-                                   pickledProblem.f,
-                                   pickledProblem.intcon,
-                                   pickledProblem.lb,
-                                   pickledProblem.ub)
-
-        b = linProblem.beq
-        linProblem.eqGraphSuperposition = linProblem.constructGraphSuperposition(A, b)
-        linProblem.f = []
-        linProblem.beq = []
-        linProblem.lb = []
-        linProblem.ub = []
-        linProblem.numVarsEq = 13
-        symmetries = linProblem.findEqSymmetriesSuperposition()
-
-        # TODO: Need to update the colouring to include f, b, lb and ub
-        self.assertEqual(symmetries, [0, 0, 2, 2, 2, 2, 6, 7, 7, 7, 7, 11, 11])
-        print(symmetries)
-
     def test_superposedSymmetriesEnlight16(self):
         # The current issue is that the constraint orbits aren't equal
         pickledProblem = pickle.load(open("pickle/enlight16.p", "rb"))
