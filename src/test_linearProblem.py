@@ -190,7 +190,7 @@ class TestLinearProblem(TestCase):
                                    pickledProblem.ub)
         symmetries = linProblem.findEqSymmetriesIntermediate()
         # TODO: Think about why the constraint orbits has changed?
-        self.assertEqual(symmetries[0:512], enlight16WithConstraints[0:512])
+        self.assertEqual(symmetries[0:512][1], enlight16WithConstraints[0:512])
 
     def test_superposedSymmetriesConstraintMatrix(self):
         row =    np.array([0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6])
