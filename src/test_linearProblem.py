@@ -239,7 +239,7 @@ class TestLinearProblem(TestCase):
         symmetries = linProblem.findEqSymmetriesSuperposition()
         # At the moment this fails because we are finding the symmtry groups with full colouring!
         # TODO: Need to update the colouring to include f, b, lb and ub
-        self.assertEqual(symmetries[0:256], enlight16WithoutConstraints[0:256])
+        self.assertEqual(symmetries[0:256][1][0:256], enlight16WithConstraints[0:256])
 
     def test_superposedSymmetriesWithConstraintsEnlight16(self):
         linProblem = constructLinProblem("enlight16")
