@@ -249,7 +249,7 @@ class TestLinearProblem(TestCase):
         symmetriesSuperposition = linProblem.findEqSymmetriesSuperposition()
         print(symmetriesIntermediate)
         print(symmetriesSuperposition)
-        #self.assertEqual(symmetriesIntermediate[1], enlight16WithConstraints[0:512])
+        self.assertEqual(symmetriesIntermediate[1], enlight16WithConstraints[0:512])
 
     def test_superposedSymmetriesWithConstraintsCov1075(self):
         linProblem = constructLinProblem("cov1075")

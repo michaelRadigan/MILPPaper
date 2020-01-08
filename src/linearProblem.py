@@ -5,6 +5,16 @@ import time as time
 import math as math
 
 
+def combineLayers(layers, numVertices):
+    combinedLayers = defaultdict(list)
+    for i, layer in enumerate(layers):
+        for startNode, edges in layer.items():
+            for edge in edges:
+                endNode = edge[0]
+                combinedLayers[startNode + i * numVertices].append(endNode + i * numVertices)
+    return combinedLayers
+
+
 class LinearProblem(object):
     def __init__(self, Aeq, Aineq, beq, bineq, f, intcon, lb, ub):
         self.Aeq = Aeq.tocoo()
@@ -15,6 +25,7 @@ class LinearProblem(object):
         self.intcon = intcon
         self.lb = lb
         self.ub = ub
+        # TODO[michaelr]: This looks a bit shit, surely we can do better?
         self.eqGraphIntermediate = None
         self.ineqGraphIntermediate = None
         self.eqGraphSuperposition = None
@@ -24,15 +35,18 @@ class LinearProblem(object):
         self.eqPartitionIntermediate = None
         self.ineqPartitionIntermediate = None
 
+        # TODO[michaelr]: This looks a bit shit, surely we can do better?
         if len(beq) != 0:
             self.numVarsEq = Aeq.shape[1]
             self.eqGraphIntermediate, self.eqPartitionIntermediate = self.constructGraphIntermediate(Aeq, beq)
             self.eqGraphSuperposition, self.eqPartitionSuperposition = self.constructGraphSuperposition(Aeq, beq)
+        # TODO[michaelr]: This looks a bit shit, surely we can do better?
         if len(bineq) != 0:
             self.numVarsIneq = Aineq.shape[1]
             self.ineqGraphIntermediate, self.ineqPartitionIntermediate = self.constructGraphIntermediate(Aineq, bineq)
             self.ineqGraphSuperposition, self.ineqPartitionSuperposition = self.constructGraphSuperposition(Aineq, bineq)
 
+    # TODO[michaelr]: The return type of this method is ridiculous, wtf
     def constructGraphIntermediate(self, A, b):
         numConstraints = A.shape[0]
         if numConstraints == 0:
@@ -45,6 +59,9 @@ class LinearProblem(object):
         coalesceDict = {}
 
         for i, j, weight in zip(A.row, A.col, A.data):
+
+            # TODO[michaelr]: This should not be 1, we can improve this by making the edge that does not
+            # TODO[michaelr]: be the most common edge weight.
             if weight == 1:
                 adjacencyDict[j].append(i + numVars)
             elif (j, weight) in coalesceDict:
@@ -66,7 +83,7 @@ class LinearProblem(object):
         vertexColouring = []
         vertexColouring.extend(self.getVariableColouring())
         vertexColouring.extend(self.getConstraintColouring(b, numVars))
-        vertexColouring.extend([l for l in values.values()])
+        vertexColouring.extend(values.values())
         return vertexColouring
 
     def getVariableColouring(self):
@@ -86,7 +103,6 @@ class LinearProblem(object):
         return constraintColourings.values()
 
     def constructGraphSuperposition(self, A, b):
-        #Aarr = A.toarray()
         numConstraints = A.shape[0]
         numVars = A.shape[1]
 
@@ -107,7 +123,7 @@ class LinearProblem(object):
             layers.append(layer_k)
 
         numVertices = numVars + numConstraints
-        superposedAdjacencyDict = self.combLayers(layers, numVertices, numVars, b)
+        superposedAdjacencyDict = combineLayers(layers, numVertices)
 
         singleLayerVariableColourings = self.getVariableColouring()
         singleLayerConstraintColourings = self.getConstraintColouring(b, numVars)
@@ -116,7 +132,6 @@ class LinearProblem(object):
         colourings.extend(singleLayerVariableColourings)
         colourings.extend(singleLayerConstraintColourings)
         for i in range(1, numLayers):
-            #colourings.append(set(map(lambda x: x + i*numVertices, range(numVertices))))
             for variableColouring in singleLayerVariableColourings:
                 colourings.append(set(map(lambda x: x + i*numVertices, variableColouring)))
             for constraintColouring in singleLayerConstraintColourings:
@@ -136,88 +151,7 @@ class LinearProblem(object):
                 layer_k[j].append((i + numVars, weight))
         return layer_k
 
-    def combLayers(self, layers, numVertices, numVars, b):
-        combinedLayers = defaultdict(list)
-        #combinedColourings = defaultdict(set)
-        isFirstLayer = True
-        for i, layer in enumerate(layers):
-            for startNode, edges in layer.items():
-                #colourIdentifier = (True, i, self.f[startNode][0], self.lb[startNode][0], self.ub[startNode][0])
-                #combinedColourings[colourIdentifier].add(startNode + i*numVertices)
-                if not isFirstLayer:
-                    combinedLayers[startNode + i * numVertices].append(startNode + (i-1)*numVertices)
-                for edge in edges:
-                    endNode = edge[0]
-                    combinedLayers[startNode + i * numVertices].append(endNode + i * numVertices)
-                    #b_i = b[endNode - numVars][0]
-                    #combinedColourings[(False, i, b_i)].add(endNode + i * numVertices)
-                    if not isFirstLayer:
-                        combinedLayers[endNode + i * numVertices].append(endNode + (i-1)*numVertices)
-
-        #colourings = list(combinedColourings.values())
-        #colourings.sort(key=max)
-        return combinedLayers
-
-    def combineLayers(self, layers, numVertices, numVars, b):
-        combinedLayers = defaultdict(list)
-        count = 0
-        superposedColouringDict = defaultdict(set)
-        firstLayer = True
-        #padding = 0
-        for i, layer in enumerate(layers):
-            #prevPadding = padding
-            #padding = count
-            for startVertex, endVertices in layer.items():
-                if not firstLayer:
-                    #combinedLayers[startVertex + padding].append(startVertex + prevPadding)
-                    combinedLayers[startVertex + i*numVertices].append(startVertex + (i-1)*numVertices)
-                    count += 1
-                # TODO: Clean this up after working and make it obvious what is going on!
-                colourIdentifier = (True, i, self.f[startVertex][0], self.lb[startVertex][0], self.ub[startVertex][0])
-                superposedColouringDict[colourIdentifier].add(startVertex)
-                for endVertex in endVertices:
-                    endVertexIndex = endVertex[0]
-                    b_i = b[endVertexIndex - numVars][0]
-                    superposedColouringDict[(False, i, b_i)].add(endVertexIndex)
-                    #combinedLayers[startVertex + padding].append(endVertexIndex + padding)
-                    combinedLayers[startVertex + i*numVertices].append(endVertexIndex + i*numVertices)
-                    count += 1
-            firstLayer = False
-
-        combMap = {}
-        new = 0
-        for key in combinedLayers.keys():
-            if key not in combMap:
-                combMap[key] = new
-                new += 1
-
-        for values in combinedLayers.values():
-            for val in values:
-                if val not in combMap:
-                    combMap[val] = new
-                    new += 1
-
-        remappedLayers = {}
-        remappedColourings = []
-
-        for key in combinedLayers.keys():
-            oldVals = combinedLayers[key]
-            newVals = []
-            for oldVal in oldVals:
-                newVal = combMap[oldVal]
-                newVals.append(newVal)
-            newKey = combMap[key]
-            remappedLayers[newKey] = newVals
-
-        for oldColouring in superposedColouringDict.values():
-            newColouring = set()
-            for oldVal in oldColouring:
-                newVal = combMap[oldVal]
-                newColouring.add(newVal)
-            remappedColourings.append(newColouring)
-
-        return remappedLayers, remappedColourings, new
-#        return combinedLayers, superposedColouringDict.values(), count
+    # TODO[michaelr]: This is both mental and shit :(
 
     @staticmethod
     def shouldIncludeEdge(colour, i, distinctWeights):
