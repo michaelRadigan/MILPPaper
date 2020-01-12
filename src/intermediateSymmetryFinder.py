@@ -21,28 +21,28 @@ def getConstraintColouring(b, numVars):
 
 
 # TODO[michaelr]: Just pass in the linProblem??
-def getVertexColouring(b, numVars, values, f, lb, ub):
+def getVertexColouring(linProblem, values):
     vertexColouring = []
-    vertexColouring.extend(getVariableColouring(f, lb, ub))
-    vertexColouring.extend(getConstraintColouring(b, numVars))
+    vertexColouring.extend(getVariableColouring(linProblem.f, linProblem.lb, linProblem.ub))
+    vertexColouring.extend(getConstraintColouring(linProblem.beq, linProblem.numVarsEq))
     vertexColouring.extend(values.values())
     return vertexColouring
 
 
 # TODO[michaelr]: The return type of this method is ridiculous, wtf
 # TODO[michaelr]: Pass in the linProblem
-def constructGraphIntermediate(A, b, f, lb, ub):
-    numConstraints = A.shape[0]
+def constructGraphIntermediate(linProblem):
+    numConstraints = linProblem.Aeq.shape[0]
     if numConstraints == 0:
         return None
-    numVars = A.shape[1]
+    numVars = linProblem.Aeq.shape[1]
     numVertices = numConstraints + numVars
 
     intermediateNodeColouring = defaultdict(set)
     adjacencyDict = defaultdict(list)
     coalesceDict = {}
 
-    for i, j, weight in zip(A.row, A.col, A.data):
+    for i, j, weight in zip(linProblem.Aeq.row, linProblem.Aeq.col, linProblem.Aeq.data):
 
         # TODO[michaelr]: This should not be 1, we can improve this by making the edge that does not
         # TODO[michaelr]: be the most common edge weight.
@@ -60,11 +60,11 @@ def constructGraphIntermediate(A, b, f, lb, ub):
             adjacencyDict[i + numVars].append(numVertices)
             numVertices += 1
 
-    vertexColouring = getVertexColouring(b, numVars, intermediateNodeColouring, f, lb, ub)
+    vertexColouring = getVertexColouring(linProblem, intermediateNodeColouring)
     return nauty.Graph(numVertices, False, adjacencyDict, vertexColouring), vertexColouring
 
 
 # TODO[michaelr]: Clean everything such that this is less heinous
-def findSymmetries(A, b, f, lb, ub):
-    graph = constructGraphIntermediate(A, b, f, lb, ub)[0]
+def findSymmetries(linProblem):
+    graph = constructGraphIntermediate(linProblem)[0]
     return nauty.autgrp(graph)[3]
