@@ -164,7 +164,7 @@ enlight16WithoutConstraints = [0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, 1
 
 
 def constructLinProblem(problemName):
-    pickledProblem = pickle.load(open("pickle/" + problemName + ".p", "rb"))
+    pickledProblem = pickle.load(open("../pickle/" + problemName + ".p", "rb"))
     return LinearProblem(pickledProblem.Aeq.tocoo(),
                          pickledProblem.Aineq.tocoo(),
                          pickledProblem.beq,
@@ -174,17 +174,10 @@ def constructLinProblem(problemName):
                          pickledProblem.lb,
                          pickledProblem.ub)
 
+
 class TestLinearProblem(TestCase):
     def test_findEqSymmetriesEnlight16(self):
-        pickledProblem = pickle.load(open("pickle/enlight16.p", "rb"))
-        linProblem = LinearProblem(pickledProblem.Aeq.tocoo(),
-                                   pickledProblem.Aineq.tocoo(),
-                                   pickledProblem.beq,
-                                   pickledProblem.bineq,
-                                   pickledProblem.f,
-                                   pickledProblem.intcon,
-                                   pickledProblem.lb,
-                                   pickledProblem.ub)
+        linProblem = constructLinProblem("enlight16")
         symmetries = linProblem.findEqSymmetriesIntermediate()
         # TODO: Think about why the constraint orbits has changed?
         self.assertEqual(symmetries[0:512][1], enlight16WithConstraints[0:512])
