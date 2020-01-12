@@ -1,5 +1,8 @@
 import graph as graph
 
+
+## Don't delete this until the tests have been reused!
+## TODO[michaelr]: Should definitely reuse these as tests!!
 # A test constraint matrix
 constraintMatrix = [
     [1, 1, 0, 0, 0, 0],

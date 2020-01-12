@@ -1,3 +1,4 @@
+# NOTE: This is important, used to generate the LaTeX visualisations!
 # Find orbital partition in the linear case
 import pynauty as nauty
 from collections import defaultdict
@@ -64,7 +65,6 @@ bi = nauty.Graph(numVertices, False, adjacencyDict, colours)
 
 print('About to find automorphism group')
 autoGroup = nauty.autgrp(bi)
-print(autoGroup[3])
 
 symmetries = autoGroup[3]
 
