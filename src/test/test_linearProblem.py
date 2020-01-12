@@ -2,6 +2,7 @@ from unittest import TestCase
 
 from linearProblem import LinearProblem
 import pickle as pickle
+import intermediateSymmetryFinder as sf
 
 enlight16WithConstraints = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 17, 18, 19, 20, 21, 22, 23, 24, 25,
                             26, 27, 28, 29, 30, 31, 2, 18, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 3,
@@ -197,3 +198,11 @@ class TestLinearProblem(TestCase):
         symmetriesIneqIntermediate = linProblem.findIneqSymmetriesIntermediate()
         symmetriesIneqSuperposition = linProblem.findIneqSymmetriesSuperposition()
         self.assertEqual(symmetriesIneqIntermediate[1], symmetriesIneqSuperposition[1])
+
+    def test_filthy(self):
+        linProblem = constructLinProblem("enlight16")
+        symmetries = sf.findSymmetries(linProblem.Aeq, linProblem.beq, linProblem.f, linProblem.lb, linProblem.ub)
+
+
+        # TODO[michaelr]: Why is this only equal up to 512?
+        self.assertEqual(symmetries[0:512], enlight16WithConstraints[0:512])
