@@ -2,6 +2,7 @@ from unittest import TestCase
 from symmetryFinder import *
 
 
+# TODO[michaelr]: I think that it's very likely that we can reuse these test cases
 class TestSymmetryFinder(TestCase):
     constraintMatrix = [
         [1, 1, 0, 0, 0, 0],
