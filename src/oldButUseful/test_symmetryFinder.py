@@ -1,6 +1,5 @@
 from unittest import TestCase
-from symmetryFinder import *
-
+from oldButUseful.symmetryFinder import *
 
 # TODO[michaelr]: I think that it's very likely that we can reuse these test cases
 class TestSymmetryFinder(TestCase):

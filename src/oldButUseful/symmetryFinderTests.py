@@ -1,5 +1,5 @@
 import unittest
-from symmetryFinder import *
+from oldButUseful.symmetryFinder import *
 
 # A test constraint matrix 
 constraintMatrix = [

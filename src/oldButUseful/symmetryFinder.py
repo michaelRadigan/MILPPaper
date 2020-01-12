@@ -1,8 +1,4 @@
-import pynauty as nauty
-import igraph as igraph
-import colorsys as colorsys
-import copy as copy
-import graph as graph
+from oldButUseful import graph as graph
 import itertools as itertools
 
 class SymmetryFinder(object):
