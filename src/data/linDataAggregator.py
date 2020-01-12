@@ -2,7 +2,6 @@ import pickle as pickle
 import os as os
 from collections import defaultdict
 import matplotlib.pyplot as plt
-import numpy as np
 
 dataDir = '/home/michael/4thYear/project/src/linData'
 allDataFiles = [x for x in next(os.walk(dataDir))[2] if x.endswith(".p")]

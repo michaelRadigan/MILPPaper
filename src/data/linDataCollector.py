@@ -1,7 +1,7 @@
 import os as os
 import linearProblem as lp
 import pickle as pickle
-import linData as ld
+from data import linData as ld
 import pebble as pebble
 import time as time
 
@@ -21,7 +21,7 @@ def constructLinProblem(problemName):
 # instancePath = '/home/michael/4thYear/project/scripts/parsedInstances'
 # problemNames = next(os.walk(instancePath))[1]
 
-
+# Note that this ay have been broken by the directory move in the large refactor
 def pickleProblem(problemName):
     print("Starting: " + problemName)
     linProblem = constructLinProblem(problemName)
@@ -56,14 +56,15 @@ def pickleProblem(problemName):
         eqIntNumNodes = 0
         eqIntPartition = None
 
-    #problemData = ld.LinData(problemName, eqSupTime, ineqSupTime, eqSupSymmetry, ineqSupSymmetry,
+    # problemData = ld.LinData(problemName, eqSupTime, ineqSupTime, eqSupSymmetry, ineqSupSymmetry,
     #             eqSupNumNodes, ineqSupNumNodes, eqSupPartition, ineqSupPartition,
     #             eqIntTime, ineqIntTime, eqIntSymmetry, ineqIntSymmetry,
     #             eqIntNumNodes, ineqIntNumNodes, eqIntPartition, ineqIntPartition)
 
-    #picklePath = '/home/michael/4thYear/project/src/linData2'
-    #pickle.dump(problemData, open(picklePath + '/' + problemName, "wb"))
-    #return 0
+    # picklePath = '/home/michael/4thYear/project/src/linData2'
+    # pickle.dump(problemData, open(picklePath + '/' + problemName, "wb"))
+    # return 0
+
 
 def pickleIntEq(problemName):
     linProblem = constructLinProblem(problemName)
@@ -79,6 +80,7 @@ def pickleIntEq(problemName):
                              eqIntNumNodes, eqIntPartition)
     picklePath = '/home/michael/4thYear/project/src/linData2/intEq'
     pickle.dump(problemData, open(picklePath + '/' + problemName, "wb"))
+
 
 def pickleIntIneq(problemName):
     linProblem = constructLinProblem(problemName)
@@ -129,14 +131,15 @@ def pickleSupIneq(problemName):
     picklePath = '/home/michael/4thYear/project/src/linData2/supIneq'
     pickle.dump(problemData, open(picklePath + '/' + problemName, "wb"))
 
-#notTriedYet = ['germanrr', 'bley_xl1', 'neos-933638', 'core4872-1529', 'ns2118727', 'neos15']
 
-#[pickleProblem(x) for x in notTriedYet]
+# notTriedYet = ['germanrr', 'bley_xl1', 'neos-933638', 'core4872-1529', 'ns2118727', 'neos15']
+
+# [pickleProblem(x) for x in notTriedYet]
 
 
 instancePath = "/home/michael/4thYear/project/src/linData2/intEq"
 problemNames = next(os.walk(instancePath))[2]
-#problemNames = ['enlight16.p']
+# problemNames = ['enlight16.p']
 
 with pebble.ProcessPool(max_workers=2) as pool:
     future = pool.map(pickleSupIneq, problemNames, timeout=600)
@@ -158,7 +161,7 @@ with pebble.ProcessPool(max_workers=2) as pool:
 
 print("sleeping for 5 seconds")
 time.sleep(5)
-    #multiple_results = [pool.schedule(pickleProblem, (problemName,), timeout=60) for problemName in notTriedYet]
+# multiple_results = [pool.schedule(pickleProblem, (problemName,), timeout=60) for problemName in notTriedYet]
 #    multiple_results = [pool.schedule(pickleProblem, (problemName,), timeout=600) for problemName in problemNames]
 
 #    for res in multiple_results:

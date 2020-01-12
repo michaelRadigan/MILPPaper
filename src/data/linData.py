@@ -1,5 +1,3 @@
-
-
 class LinData(object):
     def __init__(self, problemName, isEq, isInt, time, symmetry, numNodes, partition):
         self.problemName = problemName
