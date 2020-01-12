@@ -67,4 +67,5 @@ def constructGraphIntermediate(linProblem):
 # TODO[michaelr]: Clean everything such that this is less heinous
 def findSymmetries(linProblem):
     graph = constructGraphIntermediate(linProblem)[0]
-    return nauty.autgrp(graph)[3]
+    aut = nauty.autgrp(graph)[3]
+    return aut

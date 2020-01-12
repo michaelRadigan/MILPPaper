@@ -189,9 +189,9 @@ class TestLinearProblem(TestCase):
         symmetriesIntermediate = linProblem.findEqSymmetriesIntermediate()
         symmetriesSuperposition = linProblem.findEqSymmetriesSuperposition()
 
-        # TODO[michaelr]: Shoul this actually go to 512?
+        # TODO[michaelr]: Should this actually go to 512?
         self.assertEqual(symmetriesSuperposition[1][0:256], enlight16WithConstraints[0:256])
-        self.assertEqual(symmetriesIntermediate[1][0:256], enlight16WithConstraints[0:256])
+        self.assertEqual(symmetriesIntermediate[1][0:512], enlight16WithConstraints[0:512])
 
     def test_superposedSymmetriesWithConstraintsCov1075(self):
         linProblem = constructLinProblem("cov1075")
@@ -204,4 +204,4 @@ class TestLinearProblem(TestCase):
         symmetries = sf.findSymmetries(linProblem)
 
         # TODO[michaelr]: Why is this only equal up to 512?
-        self.assertEqual(symmetries[0:512], enlight16WithConstraints[0:512])
+        self.assertEqual(symmetries[0:linProblem.numVarsEq], enlight16WithConstraints[0:linProblem.numVarsEq])
