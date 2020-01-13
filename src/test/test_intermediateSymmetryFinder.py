@@ -6,13 +6,13 @@ import intermediateSymmetryFinder as sf
 
 
 def constructMatrixOnlyLinProblem(A):
-    beq = np.array([[1], [1], [1], [1], [1], [1], [1]])
+    beq = np.array([[1] for _ in range(A.shape[0])])
 
     # TODO[michaelr]: Clearly this is wrong but just making it work with what we already have...
-    f = np.array([[1], [1], [1], [1], [1], [1]])
-    intcon = np.array([[1], [1], [1], [1], [1], [1]])
-    lb = np.array([[1], [1], [1], [1], [1], [1]])
-    ub = np.array([[1], [1], [1], [1], [1], [1]])
+    f = np.array([[1] for _ in range(A.shape[1])])
+    intcon = np.array([[1] for _ in range(A.shape[1])])
+    lb = np.array([[1] for _ in range(A.shape[1])])
+    ub = np.array([[1] for _ in range(A.shape[1])])
 
     # TODO[michaelr]: Fx this! Passing in the eq to ineq to get around the awful design
     return LinearProblem(A, A, beq, beq, f, intcon, lb, ub)
@@ -96,6 +96,14 @@ class TestIntermediateSymmetryFinder(TestCase):
         linProblem = constructMatrixOnlyLinProblem(Aeq)
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11, 13, 13, 15, 16, 15, 16])
+
+    def test_largerUnweightedMatrixOnly(self):
+        Aeq = listToSparseMatrix(self.largerConstraintMatrix)
+        linProblem = constructMatrixOnlyLinProblem(Aeq)
+        sym = sf.findSymmetries(linProblem)
+        self.assertEqual(sym,
+                         [0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 12, 12, 14, 14, 12, 14, 14, 12, 14, 14, 14, 14, 24, 24,
+                          24, 24])
 
 
 '''
