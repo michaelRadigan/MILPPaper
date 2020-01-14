@@ -105,22 +105,13 @@ class TestIntermediateSymmetryFinder(TestCase):
                          [0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 12, 12, 14, 14, 12, 14, 14, 12, 14, 14, 14, 14, 24, 24,
                           24, 24])
 
+    def test_largerWeightedMatrixOnly(self):
+        Aeq = listToSparseMatrix(self.largerWeightedConstraintMatrix)
+        linProblem = constructMatrixOnlyLinProblem(Aeq)
+        sym = sf.findSymmetries(linProblem)
+        self.assertEqual(sym, [0, 1, 0, 1, 4, 4, 6, 6, 4, 4, 6, 6, 12, 12, 14, 14, 12, 17, 17, 12, 14, 14, 17, 17, 24, 25, 24, 25, 28, 28, 28, 28])
 
 '''
-
-    def testLargerUnweightedSymmetries(self):
-        s = SymmetryFinder(self.largerConstraintMatrix)
-        symmetries = s.get_symmetries()
-        symmetries.sort()
-        self.assertEqual(symmetries, [{0, 1, 2, 3}, {4, 5, 6, 7, 8, 9, 10, 11}])
-
-    def testLargerWeightedSymmetries(self):
-        s = SymmetryFinder(self.largerWeightedConstraintMatrix)
-        symmetries = s.get_symmetries()
-        symmetries.sort()
-
-        self.assertEqual(symmetries, [{0, 2}, {1, 3}, {4, 5, 8, 9}, {6, 7, 10, 11}])
-
     def testLargerUnweightedSymmetriesWithSimpleLinearObjectiveFunction(self):
         s = SymmetryFinder(self.largerConstraintMatrix, c=self.objectiveTest)
         symmetries = s.get_symmetries()
