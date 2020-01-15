@@ -8,14 +8,8 @@ import time as time
 
 def constructLinProblem(problemName):
     pickledProblem = pickle.load(open("pickle/" + problemName, "rb"))
-    return lp.LinearProblem(pickledProblem.Aeq.tocoo(),
-                            pickledProblem.Aineq.tocoo(),
-                            pickledProblem.beq,
-                            pickledProblem.bineq,
-                            pickledProblem.f,
-                            pickledProblem.intcon,
-                            pickledProblem.lb,
-                            pickledProblem.ub)
+    return lp.LinearProblem(pickledProblem.Aeq.tocoo(), pickledProblem.Aineq.tocoo(), pickledProblem.beq,
+                            pickledProblem.bineq, pickledProblem.f, pickledProblem.lb, pickledProblem.ub)
 
 
 # instancePath = '/home/michael/4thYear/project/scripts/parsedInstances'

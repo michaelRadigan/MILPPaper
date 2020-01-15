@@ -133,5 +133,4 @@ class TestIntermediateSymmetryFinder(TestCase):
         linProblem.ub = np.array([[1], [1], [2], [1], [2], [1]])
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
-        
-        
+

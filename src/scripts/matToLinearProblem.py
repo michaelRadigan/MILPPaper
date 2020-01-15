@@ -28,7 +28,7 @@ for problemName in problemNames:
     lb = sio.loadmat(problemPath + '/' + 'lb.mat')['lb']
     ub = sio.loadmat(problemPath + '/' + 'ub.mat')['ub']
 
-    problem = lp.LinearProblem(Aeq, Aineq, beq, bineq, f, intcon, lb, ub)
+    problem = lp.LinearProblem(Aeq, Aineq, beq, bineq, f, lb, ub)
 
     picklePath = '/home/michael/4thYear/project/src/pickle/'
     pickle.dump(problem, open(picklePath + problemName + '.p', "wb"))
