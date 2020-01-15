@@ -15,7 +15,7 @@ def constructMatrixOnlyLinProblem(A):
     ub = np.array([[1] for _ in range(A.shape[1])])
 
     # TODO[michaelr]: Fx this! We are currently passing in eq to ineq to get around the awful design
-    return LinearProblem(A, A, beq, beq, f, intcon, lb, ub)
+    return LinearProblem(A, A, beq, beq, f, lb, ub)
 
 
 def listToSparseMatrix(matrix):
@@ -133,3 +133,5 @@ class TestIntermediateSymmetryFinder(TestCase):
         linProblem.ub = np.array([[1], [1], [2], [1], [2], [1]])
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
+        
+        
