@@ -126,3 +126,10 @@ class TestIntermediateSymmetryFinder(TestCase):
         linProblem.lb = np.array([[1], [1], [2], [1], [2], [1]])
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
+
+    def test_simpleUnweightedMatrixWIthUpperBounds(self):
+        Aeq = listToSparseMatrix(self.constraintMatrix)
+        linProblem = constructMatrixOnlyLinProblem(Aeq)
+        linProblem.ub = np.array([[1], [1], [2], [1], [2], [1]])
+        sym = sf.findSymmetries(linProblem)
+        self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
