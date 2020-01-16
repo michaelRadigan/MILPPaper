@@ -134,7 +134,6 @@ class TestIntermediateSymmetryFinder(TestCase):
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
-    # TODO[michaelr]: I think that this is right but really double check this!
     def test_simpleUnweightedMatrixWithBeq(self):
         Aeq = listToSparseMatrix(self.constraintMatrix)
         linProblem = constructMatrixOnlyLinProblem(Aeq)
@@ -142,4 +141,12 @@ class TestIntermediateSymmetryFinder(TestCase):
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
+    def test_fullLinearProblem(self):
+        Aeq = listToSparseMatrix(self.largerConstraintMatrix)
+        linProblem = constructMatrixOnlyLinProblem(Aeq)
+        linProblem.beq = np.array([[1], [1], [1], [1], [1], [2], [1], [1], [1], [1], [2], [1], [1], [1], [1], [1]])
+        linProblem.lb = np.array([[0], [0], [0], [0], [1], [0], [0], [0], [0], [1], [0], [0]])
+        linProblem.lb = np.array([[1], [1], [1], [1], [2], [1], [1], [1], [1], [2], [1], [1]])
+        sym = sf.findSymmetries(linProblem)
+        self.assertEqual(sym, [0, 1, 0, 1, 4, 5, 6, 7, 5, 4, 6, 7, 12, 12, 14, 15, 12, 17, 18, 12, 15, 14, 17, 18, 24, 25, 24, 25])
 

@@ -15,8 +15,6 @@ def combineLayers(layers, numVertices):
     return combinedLayers
 
 
-
-# TODO[michaelr]: intcon is not used, can we just nuke it (will it break the pickled stuff?
 class LinearProblem(object):
     def __init__(self, Aeq, Aineq, beq, bineq, f, lb, ub):
         self.Aeq = Aeq.tocoo()
