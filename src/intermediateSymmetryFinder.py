@@ -20,7 +20,6 @@ def getConstraintColouring(b, numVars):
     return constraintColourings.values()
 
 
-# TODO[michaelr]: Just pass in the linProblem??
 def getVertexColouring(linProblem, values):
     vertexColouring = []
     vertexColouring.extend(getVariableColouring(linProblem.f, linProblem.lb, linProblem.ub))
@@ -30,7 +29,6 @@ def getVertexColouring(linProblem, values):
 
 
 # TODO[michaelr]: The return type of this method is ridiculous, wtf
-# TODO[michaelr]: Pass in the linProblem
 def constructGraphIntermediate(linProblem):
     numConstraints = linProblem.Aeq.shape[0]
     if numConstraints == 0:
@@ -42,6 +40,8 @@ def constructGraphIntermediate(linProblem):
     adjacencyDict = defaultdict(list)
     coalesceDict = {}
 
+    # TODO[michaelr]: Making this tuple incorporate whether it is an equality or an inequality constrait could
+    # TODO[michaelr]: clean this up a bit??
     for i, j, weight in zip(linProblem.Aeq.row, linProblem.Aeq.col, linProblem.Aeq.data):
 
         # TODO[michaelr]: This should not be 1, we can improve this by making the edge that does not
@@ -64,7 +64,6 @@ def constructGraphIntermediate(linProblem):
     return nauty.Graph(numVertices, False, adjacencyDict, vertexColouring), vertexColouring
 
 
-# TODO[michaelr]: Clean everything such that this is less heinous
 def findSymmetries(linProblem):
     graph = constructGraphIntermediate(linProblem)[0]
     aut = nauty.autgrp(graph)[3]
