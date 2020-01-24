@@ -33,7 +33,7 @@ def constructGraphIntermediate(linProblem):
     numConstraints = linProblem.Aineq.shape[0]
     if numConstraints == 0:
         return None
-    numVars = linProblem.Aineq.shape[1]
+    numVars = linProblem.numVarsIneq
     numVertices = numConstraints + numVars
 
     intermediateNodeColouring = defaultdict(set)

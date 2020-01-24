@@ -18,7 +18,7 @@ def constructMatrixOnlyLinProblem(A):
     Aeq = randMatrix(A.shape[1], A.shape[0])
 
     # TODO[michaelr]: Fx this! We are currently passing in eq to ineq to get around the awful design
-    return LinearProblem(A, Aeq, beq, bineq, f, lb, ub)
+    return LinearProblem(Aeq, A, beq, bineq, f, lb, ub)
 
 
 def randMatrix(n, m):
