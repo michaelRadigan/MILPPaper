@@ -10,7 +10,6 @@ def constructMatrixOnlyLinProblem(A):
 
     # TODO[michaelr]: Clearly this is wrong but just making it work with what we already have...
     f = np.array([[1] for _ in range(A.shape[1])])
-    intcon = np.array([[1] for _ in range(A.shape[1])])
     lb = np.array([[1] for _ in range(A.shape[1])])
     ub = np.array([[1] for _ in range(A.shape[1])])
 
