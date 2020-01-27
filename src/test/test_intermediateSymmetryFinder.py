@@ -1,24 +1,6 @@
 from unittest import TestCase
-from linearProblem import LinearProblem
-import numpy as np
-from scipy.sparse import csr_matrix
 import intermediateSymmetryFinder as sf
 from testUtils import *
-
-def constructMatrixOnlyLinProblem(A):
-    beq = np.array([[1] for _ in range(A.shape[0])])
-
-    # TODO[michaelr]: Clearly this is wrong but just making it work with what we already have...
-    f = np.array([[1] for _ in range(A.shape[1])])
-    lb = np.array([[1] for _ in range(A.shape[1])])
-    ub = np.array([[1] for _ in range(A.shape[1])])
-
-    # TODO[michaelr]: Fx this! We are currently passing in eq to ineq to get around the awful design
-    return LinearProblem(A, A, beq, beq, f, lb, ub)
-
-
-def listToSparseMatrix(matrix):
-    return csr_matrix([np.array(x) for x in matrix]).tocoo()
 
 
 class TestIntermediateSymmetryFinder(TestCase):
