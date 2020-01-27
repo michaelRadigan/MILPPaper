@@ -3,7 +3,7 @@ from linearProblem import LinearProblem
 import numpy as np
 from scipy.sparse import csr_matrix
 import intermediateSymmetryFinder as sf
-
+from testUtils import *
 
 def constructMatrixOnlyLinProblem(A):
     beq = np.array([[1] for _ in range(A.shape[0])])
@@ -22,82 +22,24 @@ def listToSparseMatrix(matrix):
 
 
 class TestIntermediateSymmetryFinder(TestCase):
-    constraintMatrix = [
-        [1, 1, 0, 0, 0, 0],
-        [1, 0, 1, 0, 0, 0],
-        [1, 0, 0, 1, 0, 0],
-        [0, 1, 0, 0, 1, 0],
-        [0, 1, 0, 0, 0, 1],
-        [0, 0, 1, 1, 0, 0],
-        [0, 0, 0, 0, 1, 1],
-    ]
-
-    weightedConstraintMatrix = [
-        [1, 1, 0, 0, 0, 0],
-        [1, 0, 3, 0, 0, 0],
-        [1, 0, 0, 1, 0, 0],
-        [0, 1, 0, 0, 3, 0],
-        [0, 1, 0, 0, 0, 1],
-        [0, 0, 2, 2, 0, 0],
-        [0, 0, 0, 0, 2, 2],
-    ]
-
-    largerConstraintMatrix = [
-        [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-        [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-        [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
-        [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-    ]
-
-    largerWeightedConstraintMatrix = [
-        [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-        [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-        [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
-        [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2],
-    ]
-
     objectiveTest = [1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1]
 
     # TODO[michaelr] Do we actually care about the orbits of the constraints?
 
     def test_simpleUnweightedMatrixOnly(self):
-        Aeq = listToSparseMatrix(self.constraintMatrix)
+        Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructMatrixOnlyLinProblem(Aeq)
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 2, 2, 2, 6, 7, 7, 7, 7, 11, 11])
 
     def test_simpleWeightedMatrixOnly(self):
-        Aeq = listToSparseMatrix(self.weightedConstraintMatrix)
+        Aeq = listToSparseMatrix(weightedConstraintMatrix)
         linProblem = constructMatrixOnlyLinProblem(Aeq)
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11, 13, 13, 15, 16, 15, 16])
 
     def test_largerUnweightedMatrixOnly(self):
-        Aeq = listToSparseMatrix(self.largerConstraintMatrix)
+        Aeq = listToSparseMatrix(largerConstraintMatrix)
         linProblem = constructMatrixOnlyLinProblem(Aeq)
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym,
@@ -105,7 +47,7 @@ class TestIntermediateSymmetryFinder(TestCase):
                           24, 24])
 
     def test_largerWeightedMatrixOnly(self):
-        Aeq = listToSparseMatrix(self.largerWeightedConstraintMatrix)
+        Aeq = listToSparseMatrix(largerWeightedConstraintMatrix)
         linProblem = constructMatrixOnlyLinProblem(Aeq)
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym,
@@ -113,35 +55,35 @@ class TestIntermediateSymmetryFinder(TestCase):
                           24, 25, 28, 28, 28, 28])
 
     def test_simpleUnweightedMatrixWithSimpleObjFunc(self):
-        Aeq = listToSparseMatrix(self.constraintMatrix)
+        Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructMatrixOnlyLinProblem(Aeq)
         linProblem.f = np.array([[1], [1], [2], [1], [2], [1]])
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_simpleUnweightedMatrixWithLowerBounds(self):
-        Aeq = listToSparseMatrix(self.constraintMatrix)
+        Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructMatrixOnlyLinProblem(Aeq)
         linProblem.lb = np.array([[1], [1], [2], [1], [2], [1]])
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_simpleUnweightedMatrixWithUpperBounds(self):
-        Aeq = listToSparseMatrix(self.constraintMatrix)
+        Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructMatrixOnlyLinProblem(Aeq)
         linProblem.ub = np.array([[1], [1], [2], [1], [2], [1]])
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_simpleUnweightedMatrixWithBeq(self):
-        Aeq = listToSparseMatrix(self.constraintMatrix)
+        Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructMatrixOnlyLinProblem(Aeq)
         linProblem.beq = np.array([[1], [1], [2], [1], [2], [1], [1]])
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_fullLinearProblem(self):
-        Aeq = listToSparseMatrix(self.largerConstraintMatrix)
+        Aeq = listToSparseMatrix(largerConstraintMatrix)
         linProblem = constructMatrixOnlyLinProblem(Aeq)
         linProblem.beq = np.array([[1], [1], [1], [1], [1], [2], [1], [1], [1], [1], [2], [1], [1], [1], [1], [1]])
         linProblem.lb = np.array([[0], [0], [0], [0], [1], [0], [0], [0], [0], [1], [0], [0]])

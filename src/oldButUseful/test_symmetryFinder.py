@@ -1,7 +1,8 @@
 from unittest import TestCase
 from oldButUseful.symmetryFinder import *
 
-# TODO[michaelr]: I think that it's very likely that we can reuse these test cases
+
+# TODO[michaelr]: Reuse all of this stuff in a better way than just copying and pasting
 class TestSymmetryFinder(TestCase):
     constraintMatrix = [
         [1, 1, 0, 0, 0, 0],

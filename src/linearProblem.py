@@ -1,5 +1,3 @@
-# A class representing a linear program
-
 class LinearProblem(object):
     def __init__(self, Aeq, Aineq, beq, bineq, f, lb, ub):
         self.Aeq = Aeq.tocoo()
