@@ -28,7 +28,6 @@ def getVertexColouring(linProblem, values):
     return vertexColouring
 
 
-# TODO[michaelr]: The return type of this method is ridiculous, wtf
 def constructGraphIntermediate(linProblem):
     numConstraints = linProblem.Aeq.shape[0]
     if numConstraints == 0:
@@ -59,10 +58,10 @@ def constructGraphIntermediate(linProblem):
             numVertices += 1
 
     vertexColouring = getVertexColouring(linProblem, intermediateNodeColouring)
-    return nauty.Graph(numVertices, False, adjacencyDict, vertexColouring), vertexColouring
+    return nauty.Graph(numVertices, False, adjacencyDict, vertexColouring)
 
 
 def findSymmetries(linProblem):
-    graph = constructGraphIntermediate(linProblem)[0]
+    graph = constructGraphIntermediate(linProblem)
     aut = nauty.autgrp(graph)[3]
     return aut

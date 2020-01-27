@@ -59,10 +59,10 @@ def constructGraphIntermediate(linProblem):
             numVertices += 1
 
     vertexColouring = getVertexColouring(linProblem, intermediateNodeColouring)
-    return nauty.Graph(numVertices, False, adjacencyDict, vertexColouring), vertexColouring
+    return nauty.Graph(numVertices, False, adjacencyDict, vertexColouring)
 
 
 def findSymmetries(linProblem):
-    graph = constructGraphIntermediate(linProblem)[0]
+    graph = constructGraphIntermediate(linProblem)
     aut = nauty.autgrp(graph)[3]
     return aut
