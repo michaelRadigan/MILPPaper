@@ -6,9 +6,9 @@ import pynauty as nauty
 def getVariableColouring(f, lb, ub):
     varColourings = defaultdict(set)
     for i in range(len(f)):
-        f_i = f[i][0]
-        lb_i = lb[i][0]
-        ub_i = ub[i][0]
+        f_i = f[i]
+        lb_i = lb[i]
+        ub_i = ub[i]
         varColourings[(f_i, lb_i, ub_i)].add(i)
     return varColourings.values()
 
@@ -16,7 +16,7 @@ def getVariableColouring(f, lb, ub):
 def getConstraintColouring(b, numVars):
     constraintColourings = defaultdict(set)
     for i in range(len(b)):
-        constraintColourings[b[i][0]].add(numVars + i)
+        constraintColourings[b[i]].add(numVars + i)
     return constraintColourings.values()
 
 
@@ -42,7 +42,7 @@ def constructGraphIntermediate(linProblem):
 
     # TODO[michaelr]: Making this tuple incorporate whether it is an equality or an inequality constrait could
     # TODO[michaelr]: clean this up a bit??
-    for i, j, weight in zip(linProblem.Aeq.row, linProblem.Aeq.col, linProblem.Aeq.data):
+    for i, j, weight in zip(linProblem.Aineq.row, linProblem.Aineq.col, linProblem.Aineq.data):
 
         # TODO[michaelr]: This should not be 1, we can improve this by making the edge that does not
         # TODO[michaelr]: be the most common edge weight.
