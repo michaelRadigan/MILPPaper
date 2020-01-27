@@ -6,7 +6,6 @@ from testUtils import *
 class TestIntermediateSymmetryFinder(TestCase):
 
     objectiveTest = [1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1]
-
     # TODO[michaelr] Do we actually care about the orbits of the constraints?
 
     def test_simpleUnweightedMatrixOnly(self):

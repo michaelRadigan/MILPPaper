@@ -83,23 +83,31 @@ def constructEqMatrixOnlyLinProblem(A):
 
     Aineq = randMatrix(A.shape[1], A.shape[0])
 
-    # TODO[michaelr]: Fx this! We are currently passing in eq to ineq to get around the awful design
-    return LinearProblem(A, A, beq, bineq, f, lb, ub)
+    return LinearProblem(A, Aineq, beq, bineq, f, lb, ub)
 
 
 def constructIneqMatrixOnlyLinProblem(A):
-    beq = randArray(A.shape[1])
+    beq = randArray(A.shape[0])
     bineq = np.array([1 for _ in range(A.shape[0])])
 
-    # TODO[michaelr]: Clearly this is wrong but just making it work with what we already have...
     f = np.array([1 for _ in range(A.shape[1])])
     lb = np.array([1 for _ in range(A.shape[1])])
     ub = np.array([1 for _ in range(A.shape[1])])
 
     Aeq = randMatrix(A.shape[1], A.shape[0])
 
-    # TODO[michaelr]: Fx this! We are currently passing in eq to ineq to get around the awful design
     return LinearProblem(Aeq, A, beq, bineq, f, lb, ub)
+
+
+def constructDoubledMatrixOnlyLinProblem(A):
+    beq = np.ones(A.shape[0])
+    bineq = np.ones(A.shape[0])
+
+    f = np.ones(A.shape[1])
+    lb = np.ones(A.shape[1])
+    ub = np.ones(A.shape[1])
+
+    return LinearProblem(A, A, beq, bineq, f, lb, ub)
 
 
 def listToSparseMatrix(matrix):
