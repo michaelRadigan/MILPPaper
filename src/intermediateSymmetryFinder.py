@@ -23,17 +23,17 @@ def getConstraintColouring(b, numVars):
 def getVertexColouring(linProblem, values):
     vertexColouring = []
     vertexColouring.extend(getVariableColouring(linProblem.f, linProblem.lb, linProblem.ub))
-    vertexColouring.extend(getConstraintColouring(linProblem.beq, linProblem.numVarsEq))
+    vertexColouring.extend(getConstraintColouring(linProblem.bineq, linProblem.numVarsIneq))
     vertexColouring.extend(values.values())
     return vertexColouring
 
 
 # TODO[michaelr]: The return type of this method is ridiculous, wtf
 def constructGraphIntermediate(linProblem):
-    numConstraints = linProblem.Aeq.shape[0]
+    numConstraints = linProblem.Aineq.shape[0]
     if numConstraints == 0:
         return None
-    numVars = linProblem.Aeq.shape[1]
+    numVars = linProblem.Aineq.shape[1]
     numVertices = numConstraints + numVars
 
     intermediateNodeColouring = defaultdict(set)
@@ -62,7 +62,6 @@ def constructGraphIntermediate(linProblem):
 
     vertexColouring = getVertexColouring(linProblem, intermediateNodeColouring)
     return nauty.Graph(numVertices, False, adjacencyDict, vertexColouring), vertexColouring
-
 
 def findSymmetries(linProblem):
     graph = constructGraphIntermediate(linProblem)[0]

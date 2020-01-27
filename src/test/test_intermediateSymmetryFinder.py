@@ -39,37 +39,37 @@ class TestIntermediateSymmetryFinder(TestCase):
     def test_simpleUnweightedMatrixWithSimpleObjFunc(self):
         Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aeq)
-        linProblem.f = np.array([[1], [1], [2], [1], [2], [1]])
+        linProblem.f = np.array([1, 1, 2, 1, 2, 1])
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_simpleUnweightedMatrixWithLowerBounds(self):
         Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aeq)
-        linProblem.lb = np.array([[1], [1], [2], [1], [2], [1]])
+        linProblem.lb = np.array([1, 1, 2, 1, 2, 1])
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_simpleUnweightedMatrixWithUpperBounds(self):
         Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aeq)
-        linProblem.ub = np.array([[1], [1], [2], [1], [2], [1]])
+        linProblem.ub = np.array([1, 1, 2, 1, 2, 1])
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
-    def test_simpleUnweightedMatrixWithBeq(self):
+    def test_simpleUnweightedMatrixWithBineq(self):
         Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aeq)
-        linProblem.beq = np.array([[1], [1], [2], [1], [2], [1], [1]])
+        linProblem.bineq = np.array([1, 1, 2, 1, 2, 1, 1])
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_fullLinearProblem(self):
         Aeq = listToSparseMatrix(largerConstraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aeq)
-        linProblem.beq = np.array([[1], [1], [1], [1], [1], [2], [1], [1], [1], [1], [2], [1], [1], [1], [1], [1]])
-        linProblem.lb = np.array([[0], [0], [0], [0], [1], [0], [0], [0], [0], [1], [0], [0]])
-        linProblem.lb = np.array([[1], [1], [1], [1], [2], [1], [1], [1], [1], [2], [1], [1]])
+        linProblem.bineq = np.array([1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1])
+        linProblem.lb = np.array([0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0])
+        linProblem.lb = np.array([1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1])
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 1, 0, 1, 4, 5, 6, 7, 5, 4, 6, 7, 12, 12, 14, 15, 12, 17, 18, 12, 15, 14, 17, 18, 24, 25, 24, 25])
 
