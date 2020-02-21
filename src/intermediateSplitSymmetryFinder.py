@@ -18,4 +18,3 @@ def findSymmetries(linProblem):
         sym.append(d[(i, j)])
 
     return sym
-    #return list(map(max, zip(symEq, symIneq)))
