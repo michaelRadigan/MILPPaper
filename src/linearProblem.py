@@ -9,3 +9,7 @@ class LinearProblem(object):
         self.ub = ub
         self.numVarsEq = Aeq.shape[1]
         self.numVarsIneq = Aeq.shape[1]
+        self.numVars = self.numVarsEq + self.numVarsIneq
+        self.numConstraintsEq = Aeq.shape[0]
+        self.numConstraintsIneq = Aeq.shape[0]
+        self.numConstraints = self.numConstraintsEq + self.numConstraintsIneq

@@ -1,10 +1,9 @@
 from unittest import TestCase
-import intermediateSymmetryFinder as sf
+import intermediateSplitSymmetryFinder as sf
 from testUtils import *
 
 
 class TestIntermediateSymmetryFinder(TestCase):
-
     objectiveTest = [1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1]
 
     # TODO[michaelr] Do we actually care about the orbits of the constraints?
@@ -72,9 +71,21 @@ class TestIntermediateSymmetryFinder(TestCase):
         linProblem.lb = np.array([0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0])
         linProblem.lb = np.array([1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1])
         sym = sf.findSymmetries(linProblem)
-        self.assertEqual(sym, [0, 1, 0, 1, 4, 5, 6, 7, 5, 4, 6, 7, 12, 12, 14, 15, 12, 17, 18, 12, 15, 14, 17, 18, 24, 25, 24, 25])
+        self.assertEqual(sym,
+                         [0, 1, 0, 1, 4, 5, 6, 7, 5, 4, 6, 7, 12, 12, 14, 15, 12, 17, 18, 12, 15, 14, 17, 18, 24, 25,
+                          24, 25])
 
-
-
-    def test_bar(self):
+    def test_simpleEqIneqSplit(self):
         Aeq = listToSparseMatrix(constraintMatrix)
+
+        Aineq = listToSparseMatrix([[0, 0, 1, 0, 1, 0]])
+        beq = np.ones(Aeq.shape[0])
+        bineq = np.ones(Aineq.shape[0])
+        f = np.ones(Aeq.shape[1])
+        lb = np.ones(Aeq.shape[1])
+        ub = np.ones(Aeq.shape[1])
+
+        linProblem = LinearProblem(Aeq, Aineq, beq, bineq, f, lb, ub)
+        sym = sf.findSymmetries(linProblem)
+        self.assertEqual(sym[:6], [0, 0, 1, 2, 1, 2])
+
