@@ -2,7 +2,7 @@
 
 import numpy as np
 import random as rand
-from scipy.sparse import csr_matrix
+from scipy.sparse import coo_matrix
 
 import linsym
 from linsym import linearProblem
@@ -113,7 +113,7 @@ def constructDoubledMatrixOnlyLinProblem(A):
 
 
 def listToSparseMatrix(matrix):
-    return csr_matrix([np.array(x) for x in matrix]).tocoo()
+    return coo_matrix([np.array(x) for x in matrix]).tocoo()
 
 
 def randMatrix(n, m):
