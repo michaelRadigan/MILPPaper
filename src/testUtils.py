@@ -2,7 +2,7 @@
 
 import numpy as np
 import random as rand
-from scipy.sparse import csr_matrix
+from scipy.sparse import coo_matrix
 
 from .linearProblem import LinearProblem
 
