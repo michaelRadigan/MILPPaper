@@ -2,8 +2,9 @@ from unittest import TestCase
 
 import numpy as np
 
-import testUtils as tu
 from testUtils import listToSparseMatrix, constructEqMatrixOnlyLinProblem
+from testUtils import constraintMatrix, weightedConstraintMatrix, largerConstraintMatrix
+from testUtils import largerWeightedConstraintMatrix
 from linsym import intermediateEqSymmetryFinder as sfEq
 
 
@@ -11,19 +12,19 @@ from linsym import intermediateEqSymmetryFinder as sfEq
 
 class TestIntermediateEqSymmetryFinder(TestCase):
     def test_simpleUnweightedMatrixOnly(self):
-        Aeq = listToSparseMatrix(tu.constraintMatrix)
+        Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructEqMatrixOnlyLinProblem(Aeq)
         sym = sfEq.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 2, 2, 2, 6, 7, 7, 7, 7, 11, 11])
 
     def test_simpleWeightedMatrixOnly(self):
-        Aeq = listToSparseMatrix(tu.weightedConstraintMatrix)
+        Aeq = listToSparseMatrix(weightedConstraintMatrix)
         linProblem = constructEqMatrixOnlyLinProblem(Aeq)
         sym = sfEq.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11, 13, 13, 15, 16, 15, 16])
 
     def test_largerUnweightedMatrixOnly(self):
-        Aeq = listToSparseMatrix(tu.largerConstraintMatrix)
+        Aeq = listToSparseMatrix(largerConstraintMatrix)
         linProblem = constructEqMatrixOnlyLinProblem(Aeq)
         sym = sfEq.findSymmetries(linProblem)
         self.assertEqual(sym,
@@ -31,7 +32,7 @@ class TestIntermediateEqSymmetryFinder(TestCase):
                           24, 24])
 
     def test_largerWeightedMatrixOnly(self):
-        Aeq = listToSparseMatrix(tu.largerWeightedConstraintMatrix)
+        Aeq = listToSparseMatrix(largerWeightedConstraintMatrix)
         linProblem = constructEqMatrixOnlyLinProblem(Aeq)
         sym = sfEq.findSymmetries(linProblem)
         self.assertEqual(sym,
@@ -39,35 +40,35 @@ class TestIntermediateEqSymmetryFinder(TestCase):
                           24, 25, 28, 28, 28, 28])
 
     def test_simpleUnweightedMatrixWithSimpleObjFunc(self):
-        Aeq = listToSparseMatrix(tu.constraintMatrix)
+        Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructEqMatrixOnlyLinProblem(Aeq)
         linProblem.f = np.array([1, 1, 2, 1, 2, 1])
         sym = sfEq.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_simpleUnweightedMatrixWithLowerBounds(self):
-        Aeq = listToSparseMatrix(tu.constraintMatrix)
+        Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructEqMatrixOnlyLinProblem(Aeq)
         linProblem.lb = np.array([1, 1, 2, 1, 2, 1])
         sym = sfEq.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_simpleUnweightedMatrixWithUpperBounds(self):
-        Aeq = listToSparseMatrix(tu.constraintMatrix)
+        Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructEqMatrixOnlyLinProblem(Aeq)
         linProblem.ub = np.array([1, 1, 2, 1, 2, 1])
         sym = sfEq.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_simpleUnweightedMatrixWithBeq(self):
-        Aeq = listToSparseMatrix(tu.constraintMatrix)
+        Aeq = listToSparseMatrix(constraintMatrix)
         linProblem = constructEqMatrixOnlyLinProblem(Aeq)
         linProblem.beq = np.array([1, 1, 2, 1, 2, 1, 1])
         sym = sfEq.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_fullLinearProblem(self):
-        Aeq = listToSparseMatrix(tu.largerConstraintMatrix)
+        Aeq = listToSparseMatrix(largerConstraintMatrix)
         linProblem = constructEqMatrixOnlyLinProblem(Aeq)
         linProblem.beq = np.array([1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1])
         linProblem.lb = np.array([0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0])

@@ -2,8 +2,10 @@ from unittest import TestCase
 
 import numpy as np
 
-import testUtils as tu
+
 from testUtils import listToSparseMatrix, constructIneqMatrixOnlyLinProblem
+from testUtils import constraintMatrix, weightedConstraintMatrix, largerConstraintMatrix
+from testUtils import largerWeightedConstraintMatrix
 from linsym import intermediateIneqSymmetryFinder as sfIneq
 
 
@@ -11,19 +13,19 @@ class TestIntermediateSymmetryFinder(TestCase):
     objectiveTest = [1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1]
 
     def test_simpleUnweightedMatrixOnly(self):
-        Aineq = listToSparseMatrix(tu.constraintMatrix)
+        Aineq = listToSparseMatrix(constraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aineq)
         sym = sfIneq.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 2, 2, 2, 6, 7, 7, 7, 7, 11, 11])
 
     def test_simpleWeightedMatrixOnly(self):
-        Aineq = listToSparseMatrix(tu.weightedConstraintMatrix)
+        Aineq = listToSparseMatrix(weightedConstraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aineq)
         sym = sfIneq.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11, 13, 13, 15, 16, 15, 16])
 
     def test_largerUnweightedMatrixOnly(self):
-        Aineq = listToSparseMatrix(tu.largerConstraintMatrix)
+        Aineq = listToSparseMatrix(largerConstraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aineq)
         sym = sfIneq.findSymmetries(linProblem)
         self.assertEqual(sym,
@@ -31,7 +33,7 @@ class TestIntermediateSymmetryFinder(TestCase):
                           24, 24])
 
     def test_largerWeightedMatrixOnly(self):
-        Aineq = listToSparseMatrix(tu.largerWeightedConstraintMatrix)
+        Aineq = listToSparseMatrix(largerWeightedConstraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aineq)
         sym = sfIneq.findSymmetries(linProblem)
         self.assertEqual(sym,
@@ -39,35 +41,35 @@ class TestIntermediateSymmetryFinder(TestCase):
                           24, 25, 28, 28, 28, 28])
 
     def test_simpleUnweightedMatrixWithSimpleObjFunc(self):
-        Aineq = listToSparseMatrix(tu.constraintMatrix)
+        Aineq = listToSparseMatrix(constraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aineq)
         linProblem.f = np.array([1, 1, 2, 1, 2, 1])
         sym = sfIneq.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_simpleUnweightedMatrixWithLowerBounds(self):
-        Aineq = listToSparseMatrix(tu.constraintMatrix)
+        Aineq = listToSparseMatrix(constraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aineq)
         linProblem.lb = np.array([1, 1, 2, 1, 2, 1])
         sym = sfIneq.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_simpleUnweightedMatrixWithUpperBounds(self):
-        Aineq = listToSparseMatrix(tu.constraintMatrix)
+        Aineq = listToSparseMatrix(constraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aineq)
         linProblem.ub = np.array([1, 1, 2, 1, 2, 1])
         sym = sfIneq.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_simpleUnweightedMatrixWithBeq(self):
-        Aineq = listToSparseMatrix(tu.constraintMatrix)
+        Aineq = listToSparseMatrix(constraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aineq)
         linProblem.bineq = np.array([1, 1, 2, 1, 2, 1, 1])
         sym = sfIneq.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 0, 2, 3, 2, 3, 6, 7, 8, 7, 8, 11, 11])
 
     def test_fullLinearProblem(self):
-        Aineq = listToSparseMatrix(tu.largerConstraintMatrix)
+        Aineq = listToSparseMatrix(largerConstraintMatrix)
         linProblem = constructIneqMatrixOnlyLinProblem(Aineq)
         linProblem.bineq = np.array([1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1])
         # TODO[michaelr]: Shouldn't this be on lb and one ub????
