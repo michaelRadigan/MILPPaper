@@ -1,6 +1,9 @@
 from linsym import linearProblem as lp
 from scipy.sparse import coo_matrix
+import numpy as np
 
+
+# TODO[michaelr]: We should use a generator fo the lines rather than indexing in weirdly all ove the place
 
 def parse(filePath):
     fo = open(filePath, "r")
@@ -9,12 +12,24 @@ def parse(filePath):
     return parse_lines(lines)
 
 
+# TODO[michaelr]: We will unmock the parts that aren't defined as we go
+def make_lp(A, obj):
+    bineq = np.array(A.shape[1])
+    beq = np.array([1 for _ in range(A.shape[0])])
+
+    # TODO[michaelr]: Use obj
+    f = np.array([1 for _ in range(A.shape[1])])
+
+    lb = np.array([1 for _ in range(A.shape[1])])
+    ub = np.array([1 for _ in range(A.shape[1])])
+
+    return lp.LinearProblem(A, A, beq, bineq, f, lb, ub)
+
+
 # Intentionally doing this absolutely filthy for no just to get it done
 def parse_lines(lines):
-    if len(lines) == 0:
+    if len(lines) <= 0:
         raise Exception("This is not a valid MPS file - EMPTY")
-
-    # First thing to do is to parse the name
 
     nameLine = lines[0]
     nameIdentifier, name = nameLine.split()
@@ -23,8 +38,6 @@ def parse_lines(lines):
         raise Exception("This is not a valid MPS file - NAME")
 
     # For now I'm not going to pay attention to the first identifier
-
-    # TODO[michaelr]: Length check again
 
     rowIdentifier = lines[1]
     if rowIdentifier.strip() != "ROWS":
@@ -36,8 +49,7 @@ def parse_lines(lines):
     objName = ""
 
     while lines[c + base].strip() != "COLUMNS":
-        # TODO[michaelr]: For now, assuming that we only have equality contraints
-        # TODO[michaelr]: N will be the objective function (which we throw away for now)
+        # TODO[michaelr]: Deal with all of the row types properly
         rowType, row = lines[c + base].split()
         if rowType == "E":
             rows[row] = c
@@ -47,18 +59,15 @@ def parse_lines(lines):
             base += 1
         else:
             raise Exception("Unknown row type: " + rowType)
-        # TODO[michaelr]: obj here is giving us an off by one error :(
 
-
+    # TODO[michaelr]: Do this properly
     # Just a filthy way to get around MARK0000 MARKER INTORG for now
     c += base + 3
-    print("firs col: " +  lines[c])
-
     numColumns = 0
 
     data, col, row = [], [], []
 
-    obj= []
+    obj = []
 
     columns = {}
 
@@ -76,9 +85,9 @@ def parse_lines(lines):
             col.append(columns[columnName])
             row.append(rows[rowName])
         else:
-            raise Exception("Unknown row: { "+ rowName + "} in column: " + columnName)
+            raise Exception("Unknown row: { " + rowName + "} in column: " + columnName)
 
         c += 1
 
     A = coo_matrix((data, (row, col)), shape=(len(rows), len(columns)))
-    return A
+    return make_lp(A, obj)
