@@ -73,8 +73,3 @@ class TestIntermediateSymmetryFinder(TestCase):
         linProblem.lb = np.array([1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1])
         sym = sf.findSymmetries(linProblem)
         self.assertEqual(sym, [0, 1, 0, 1, 4, 5, 6, 7, 5, 4, 6, 7, 12, 12, 14, 15, 12, 17, 18, 12, 15, 14, 17, 18, 24, 25, 24, 25])
-
-
-
-    def test_bar(self):
-        Aeq = listToSparseMatrix(constraintMatrix)

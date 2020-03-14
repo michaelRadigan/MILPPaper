@@ -2,8 +2,9 @@
 
 import numpy as np
 import random as rand
-from linearProblem import LinearProblem
 from scipy.sparse import csr_matrix
+
+from .linearProblem import LinearProblem
 
 constraintMatrix = \
     [
