@@ -9,25 +9,33 @@ def parse(filepath):
 
 
 # TODO[michaelr]: We will unmock the parts that aren't defined as we go
-def make_lp(A, obj):
-    bineq = np.array(A.shape[1])
-    beq = np.array([1 for _ in range(A.shape[0])])
-
+def make_lp(A, obj, rhs):
     numVars = A.shape[1]
+    numConstraints = A.shaoe[0]
 
     f = np.zeros(numVars)
+    lb = np.zeros(numVars)
+    ub = np.zeros(numVars)
+
+    bineq = np.zeros(numConstraints)
+    beq = np.zeros(numConstraints)
+
+    # TODO[michaelr]: Definitely possible to just populate these directly rather
+    # TODO[michaelr]: than building up tuples then iterating through the tuples
+    for i, val in rhs:
+        beq[i] = val
+
     for i, val in obj:
         f[i] = val
-
-    lb = np.array([1 for _ in range(A.shape[1])])
-    ub = np.array([1 for _ in range(A.shape[1])])
+    for i, val in lb:
+        lb[i] = val
+    for i, val in ub:
+        ub[i] = val
 
     return lp.LinearProblem(A, A, beq, bineq, f, lb, ub)
 
 
 def validate_first_line(first):
-    if first == "":
-        raise Exception("This is not a valid MPS file - EMPTY")
     nameIdentifier, name = first.split()
 
     if nameIdentifier != "NAME":
@@ -39,9 +47,14 @@ def validate_second_line(second):
         raise Exception("This is not a valid MPS file - ROWS")
 
 
-def validate__start_marker(line):
+def validate_start_marker(line):
     if "'MARKER'" not in line or "'INTORG'" not in line:
         raise Exception("This is not a valid MPS file - missing marker")
+
+
+def validate_rhs(line):
+    if line.strip() != "RHS":
+        raise Exception("This is not a valid MPS file - RHS")
 
 
 def read_line(file_object):
@@ -71,8 +84,8 @@ def parse_lines(fo):
     rows = {}
     objName = ""
 
-    # Could even just have rowNAme -> Type?
-    for line in read_until(fo, lambda l: l.split == "COLUMNS"):
+    # Could even just have aa dict of rowName -> Type?
+    for line in read_until(fo, lambda l: l.strip() == "COLUMNS"):
         # TODO[michaelr]: Deal with all of the row types properly
         rowType, row = line.split()
         if rowType == "E":
@@ -83,7 +96,7 @@ def parse_lines(fo):
         else:
             raise Exception("Unknown row type: " + rowType)
 
-    validate__start_marker(read_line(fo))
+    validate_start_marker(read_line(fo))
 
     data, col, row, obj = [], [], [], []
     columns = {}
@@ -104,5 +117,24 @@ def parse_lines(fo):
             raise Exception("Unknown row: { " + rowName + "} in column: " + columnName)
     A = coo_matrix((data, (row, col)), shape=(len(rows), len(columns)))
 
-    return make_lp(A, obj)
+    # TODO[michaelr]: Going to assume that "ROWS" is always required, maybe it isn't?
+    validate_rhs(read_line(fo))
+
+    rhs = []
+    for line in read_until(fo, lambda l: l.strip() == "BOUNDS"):
+        _, rowName, val = line.split()
+        rhs.append((rows[rowName], val))
+
+    ub = []
+    lb = []
+    for line in read_until(fo, lambda l: l.strip() == "ENDDATA"):
+        boundType, _, columnName, val = line.split()
+        if boundType == "UP":
+            ub.append((columns[columnName], val))
+        elif boundType == "LI":
+            lb.append((columns[columnName], val))
+        else:
+            raise Exception("")
+
+    return make_lp(A, obj, rhs, ub, lb)
 
