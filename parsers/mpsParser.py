@@ -11,7 +11,7 @@ def parse(filepath):
 # TODO[michaelr]: We will unmock the parts that aren't defined as we go
 def make_lp(A, obj, rhs, up, li):
     numVars = A.shape[1]
-    numConstraints = A.shaoe[0]
+    numConstraints = A.shape[0]
 
     f = np.zeros(numVars)
     lb = np.zeros(numVars)
@@ -128,7 +128,7 @@ def parse_lines(fo):
 
     up = []
     li = []
-    for line in read_until(fo, lambda l: l.strip() == "ENDDATA"):
+    for line in read_until(fo, lambda l: l.strip() == "ENDATA"):
         boundType, _, columnName, val = line.split()
         if boundType == "UP":
             up.append((columns[columnName], val))
