@@ -9,7 +9,7 @@ def parse(filepath):
 
 
 # TODO[michaelr]: We will unmock the parts that aren't defined as we go
-def make_lp(A, obj, rhs):
+def make_lp(A, obj, rhs, up, li):
     numVars = A.shape[1]
     numConstraints = A.shaoe[0]
 
@@ -27,10 +27,11 @@ def make_lp(A, obj, rhs):
 
     for i, val in obj:
         f[i] = val
-    for i, val in lb:
-        lb[i] = val
-    for i, val in ub:
+    for i, val in up:
         ub[i] = val
+    for i, val in li:
+        lb[i] = val
+
 
     return lp.LinearProblem(A, A, beq, bineq, f, lb, ub)
 
@@ -125,16 +126,16 @@ def parse_lines(fo):
         _, rowName, val = line.split()
         rhs.append((rows[rowName], val))
 
-    ub = []
-    lb = []
+    up = []
+    li = []
     for line in read_until(fo, lambda l: l.strip() == "ENDDATA"):
         boundType, _, columnName, val = line.split()
         if boundType == "UP":
-            ub.append((columns[columnName], val))
+            up.append((columns[columnName], val))
         elif boundType == "LI":
-            lb.append((columns[columnName], val))
+            li.append((columns[columnName], val))
         else:
-            raise Exception("")
+            raise Exception("Unknown boundType: " + boundType + " in line: " + line)
 
-    return make_lp(A, obj, rhs, ub, lb)
+    return make_lp(A, obj, rhs, up, li)
 
