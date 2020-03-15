@@ -3,13 +3,9 @@ from scipy.sparse import coo_matrix
 import numpy as np
 
 
-# TODO[michaelr]: We should use a generator fo the lines rather than indexing in weirdly all ove the place
-
-def parse(filePath):
-    fo = open(filePath, "r")
-    lines = fo.readlines()
-    fo.close()
-    return parse_lines(lines)
+def parse(filepath):
+    with open(filepath, "r") as fo:
+        return parse_lines(fo)
 
 
 # TODO[michaelr]: We will unmock the parts that aren't defined as we go
@@ -29,68 +25,84 @@ def make_lp(A, obj):
     return lp.LinearProblem(A, A, beq, bineq, f, lb, ub)
 
 
-# Intentionally doing this absolutely filthy for no just to get it done
-def parse_lines(lines):
-    if len(lines) <= 0:
+def validate_first_line(first):
+    if first == "":
         raise Exception("This is not a valid MPS file - EMPTY")
-
-    nameLine = lines[0]
-    nameIdentifier, name = nameLine.split()
+    nameIdentifier, name = first.split()
 
     if nameIdentifier != "NAME":
         raise Exception("This is not a valid MPS file - NAME")
 
-    # For now I'm not going to pay attention to the first identifier
 
-    rowIdentifier = lines[1]
-    if rowIdentifier.strip() != "ROWS":
-        raise Exception("This is nit a valid MPS file - ROWS")
+def validate_second_line(second):
+    if second.strip() != "ROWS":
+        raise Exception("This is not a valid MPS file - ROWS")
 
-    base = 2
-    c = 0
+
+def validate__start_marker(line):
+    if "'MARKER'" not in line or "'INTORG'" not in line:
+        raise Exception("This is not a valid MPS file - missing marker")
+
+
+def read_line(file_object):
+    line = file_object.readline()
+    if not line:
+        raise Exception("This is not a valid MPS file - EMPTY")
+    return line
+
+
+def is_end_marker(line):
+    return "'MARKER'" in line and "'INTEND'" in line
+
+
+def read_until(fo, condition):
+    while True:
+        line = read_line(fo)
+        if condition(line):
+            break
+        yield line
+
+
+def parse_lines(fo):
+    validate_first_line(read_line(fo))
+    validate_second_line(read_line(fo))
+
+    numRows = 0
     rows = {}
     objName = ""
 
-    while lines[c + base].strip() != "COLUMNS":
+    # Could even just have rowNAme -> Type?
+    for line in read_until(fo, lambda l: l.split == "COLUMNS"):
         # TODO[michaelr]: Deal with all of the row types properly
-        rowType, row = lines[c + base].split()
+        rowType, row = line.split()
         if rowType == "E":
-            rows[row] = c
-            c += 1
+            rows[row] = numRows
+            numRows += 1
         elif rowType == "N":
             objName = row
-            base += 1
         else:
             raise Exception("Unknown row type: " + rowType)
 
-    # TODO[michaelr]: Do this properly
-    # Just a filthy way to get around MARK0000 MARKER INTORG for now
-    c += base + 2
+    validate__start_marker(read_line(fo))
+
+    data, col, row, obj = [], [], [], []
+    columns = {}
     numColumns = 0
 
-    data, col, row = [], [], []
-
-    obj = []
-
-    columns = {}
-
-    while "MARK000" not in lines[c]:
-        columnName, rowName, val = lines[c].split()
+    for line in read_until(fo, is_end_marker):
+        columnName, rowName, val = line.split()
         if not (columnName in columns):
             columns[columnName] = numColumns
             numColumns += 1
-
         if rowName == objName:
             obj.append((columns[columnName], val))
         elif rowName in rows:
             data.append(val)
-            # TODO[michaelr]: Just assuming that this is the correct way round for now :)
             col.append(columns[columnName])
             row.append(rows[rowName])
         else:
             raise Exception("Unknown row: { " + rowName + "} in column: " + columnName)
-
-        c += 1
-
     A = coo_matrix((data, (row, col)), shape=(len(rows), len(columns)))
+
     return make_lp(A, obj)
+
