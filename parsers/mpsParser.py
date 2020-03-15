@@ -17,8 +17,11 @@ def make_lp(A, obj):
     bineq = np.array(A.shape[1])
     beq = np.array([1 for _ in range(A.shape[0])])
 
-    # TODO[michaelr]: Use obj
-    f = np.array([1 for _ in range(A.shape[1])])
+    numVars = A.shape[1]
+
+    f = np.zeros(numVars)
+    for i, val in obj:
+        f[i] = val
 
     lb = np.array([1 for _ in range(A.shape[1])])
     ub = np.array([1 for _ in range(A.shape[1])])
@@ -62,7 +65,7 @@ def parse_lines(lines):
 
     # TODO[michaelr]: Do this properly
     # Just a filthy way to get around MARK0000 MARKER INTORG for now
-    c += base + 3
+    c += base + 2
     numColumns = 0
 
     data, col, row = [], [], []
