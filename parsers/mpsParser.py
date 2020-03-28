@@ -1,7 +1,16 @@
 from linsym import linearProblem as lp
 from scipy.sparse import coo_matrix
 import numpy as np
+import sys
+import math
 
+# TODO[michaelr]: Lots of elif blocks that should be switches
+
+
+
+# TODO[michaelr]: This s fucking disgusting and should be cleaned up but for now, magic number for free row
+# TODO[michaelr]: This would break a solver but is still correct from a symmetry point of view
+UNBOUNDED = sys.maxsize * 2 + 12463574
 
 def parse(filepath):
     with open(filepath, "r") as fo:
@@ -9,31 +18,33 @@ def parse(filepath):
 
 
 # TODO[michaelr]: We will unmock the parts that aren't defined as we go
-def make_lp(A, obj, rhs, up, li):
-    numVars = A.shape[1]
-    numConstraints = A.shape[0]
+def make_lp(Aeq, Aineq, obj, rhsEq, rhsIneq, upper, lower):
+    # This is just in case one of them is empty
+    #TODO[michaelr]: Can certainly clean this up max business up
+    numVars = max(Aeq.shape[1], Aeq.shape[0])
 
     f = np.zeros(numVars)
     lb = np.zeros(numVars)
     ub = np.zeros(numVars)
 
-    bineq = np.zeros(numConstraints)
-    beq = np.zeros(numConstraints)
+    # This is just in case one of them is empty
+    bineq = np.zeros(max(Aineq.shape[0], 0))
+    beq = np.zeros(max(Aeq.shape[0], 0))
 
     # TODO[michaelr]: Definitely possible to just populate these directly rather
     # TODO[michaelr]: than building up tuples then iterating through the tuples
-    for i, val in rhs:
+    for i, val in rhsEq:
         beq[i] = val
-
+    for i, val in rhsIneq:
+        bineq[i] = val
     for i, val in obj:
         f[i] = val
-    for i, val in up:
+    for i, val in upper:
         ub[i] = val
-    for i, val in li:
+    for i, val in lower:
         lb[i] = val
 
-
-    return lp.LinearProblem(A, A, beq, bineq, f, lb, ub)
+    return lp.LinearProblem(Aeq, Aineq, beq, bineq, f, lb, ub)
 
 
 def validate_first_line(first):
@@ -48,20 +59,22 @@ def validate_second_line(second):
         raise Exception("This is not a valid MPS file - ROWS")
 
 
-def validate_start_marker(line):
-    if "'MARKER'" not in line or "'INTORG'" not in line:
-        raise Exception("This is not a valid MPS file - missing marker")
-
-
-def validate_rhs(line):
-    if line.strip() != "RHS":
-        raise Exception("This is not a valid MPS file - RHS")
-
-
 def read_line(file_object):
     line = file_object.readline()
     if not line:
         raise Exception("This is not a valid MPS file - EMPTY")
+    # TODO[michaelr]: I don't really like this
+    if line.isspace():
+        return read_line(file_object)
+    # TODO[michaelr]: Maybe this is a bit sad?
+    if "'MARKER'" in line and ("'INTORG'" in line or "'INTEND'" in line):
+        return read_line(file_object)
+    # TODO[michaelr]: Implement RANGES (note that some are empty)
+    if line.strip() == "RANGES":
+        return read_line(file_object)
+    # Ignore comments
+    if line.startswith("*"):
+        return read_line(file_object)
     return line
 
 
@@ -81,61 +94,151 @@ def parse_lines(fo):
     validate_first_line(read_line(fo))
     validate_second_line(read_line(fo))
 
-    numRows = 0
-    rows = {}
+    numEqRows, numIneqRows = 0, 0
+    # TODO[michaelr]:
+    eqRows, ineqRows = {}, {}
     objName = ""
+    lRows, gRows, fRows = set(), set(), set()
 
-    # Could even just have aa dict of rowName -> Type?
     for line in read_until(fo, lambda l: l.strip() == "COLUMNS"):
         # TODO[michaelr]: Deal with all of the row types properly
-        rowType, row = line.split()
+        split = line.split()
+        # TODO[michaelr]: This is to deal with weird comments (?) in rvb-sub.mos
+        rowType, row = (split[0], split[1])
+        #rowType, row = line.split()
         if rowType == "E":
-            rows[row] = numRows
-            numRows += 1
+            eqRows[row] = numEqRows
+            numEqRows += 1
+        elif rowType == "L":
+            ineqRows[row] = numIneqRows
+            lRows.add(row)
+            numIneqRows += 1
+        elif rowType == "G":
+            ineqRows[row] = numIneqRows
+            gRows.add(row)
+            numIneqRows += 1
         elif rowType == "N":
-            objName = row
+            if not objName:
+                objName = row
+            else:
+                fRows.add(row)
+                ineqRows[row] = numIneqRows
+                numIneqRows += 1
+
         else:
             raise Exception("Unknown row type: " + rowType)
 
-    validate_start_marker(read_line(fo))
-
-    data, col, row, obj = [], [], [], []
+    eqData, eqCol, eqRow, obj, ineqData, ineqCol, ineqRow = [], [], [], [], [], [], []
     columns = {}
     numColumns = 0
 
-    for line in read_until(fo, is_end_marker):
-        columnName, rowName, val = line.split()
+    def process_column(columnName, rowName, val, numColumns):
         if not (columnName in columns):
             columns[columnName] = numColumns
             numColumns += 1
         if rowName == objName:
             obj.append((columns[columnName], val))
-        elif rowName in rows:
-            data.append(val)
-            col.append(columns[columnName])
-            row.append(rows[rowName])
+        elif rowName in eqRows:
+            eqData.append(val)
+            eqCol.append(columns[columnName])
+            eqRow.append(eqRows[rowName])
+        elif rowName in ineqRows:
+            if rowName in gRows:
+                val *= 1
+            ineqData.append(val)
+            ineqCol.append(columns[columnName])
+            ineqRow.append(ineqRows[rowName])
         else:
             raise Exception("Unknown row: { " + rowName + "} in column: " + columnName)
-    A = coo_matrix((data, (row, col)), shape=(len(rows), len(columns)))
+        return numColumns
 
-    # TODO[michaelr]: Going to assume that "ROWS" is always required, maybe it isn't?
-    validate_rhs(read_line(fo))
-
-    rhs = []
-    for line in read_until(fo, lambda l: l.strip() == "BOUNDS"):
-        _, rowName, val = line.split()
-        rhs.append((rows[rowName], val))
-
-    up = []
-    li = []
-    for line in read_until(fo, lambda l: l.strip() == "ENDATA"):
-        boundType, _, columnName, val = line.split()
-        if boundType == "UP":
-            up.append((columns[columnName], val))
-        elif boundType == "LI":
-            li.append((columns[columnName], val))
+    for line in read_until(fo, lambda l: l.strip() == "RHS"):
+        numSplits = len(line.split())
+        if numSplits == 3:
+            columnName, rowName, val = line.split()
+            numColumns = process_column(columnName, rowName, val, numColumns)
+        elif numSplits == 5:
+            columnName, rowName1, val1, rowName2, val2 = line.split()
+            numColumns = process_column(columnName, rowName1, val1, numColumns)
+            numColumns = process_column(columnName, rowName2, val2, numColumns)
         else:
-            raise Exception("Unknown boundType: " + boundType + " in line: " + line)
+            raise Exception("Unable to parse column definitions from line: " + line)
 
-    return make_lp(A, obj, rhs, up, li)
+    Aeq = coo_matrix((eqData, (eqRow, eqCol)), shape=(len(eqRows), len(columns)))
+
+    # Free row tangent, wantit to be all zeros with rhs inf and a
+    Aineq = coo_matrix((ineqData, (ineqRow, ineqCol)), shape=(len(ineqRows), len(columns)))
+
+    rhsEq, rhsIneq = [], []
+
+    def process_rhs(name, value):
+        if name in eqRows:
+            rhsEq.append((eqRows[name], value))
+        elif name in ineqRows:
+            if name in gRows:
+                value *= 1
+            rhsIneq.append((ineqRows[name], value))
+
+    for line in read_until(fo, lambda l: l.strip() == "BOUNDS"):
+        numSplits = len(line.split())
+        if numSplits == 3:
+
+            _, rowName, val = line.split()
+            process_rhs(rowName, val)
+        elif numSplits == 5:
+            _, rowName1, val1, rowName2, val2 = line.split()
+            process_rhs(rowName1, val1)
+            process_rhs(rowName2, val2)
+        else:
+            raise Exception("Unable to parse RHS definitions from line: " + line)
+
+    for fRowName in fRows:
+        rhsIneq.append((ineqRows[fRowName], UNBOUNDED))
+
+    upper = []
+    lower = []
+    for line in read_until(fo, lambda l: l.strip() == "ENDATA"):
+        # TODO[michaelr]: Do we need to cover "Made Integer" from the docs?
+        numSplits = len(line.split())
+        if numSplits == 4:
+            boundType, _, columnName, val = line.split()
+            if boundType == "UP":
+                upper.append((columns[columnName], val))
+            elif boundType == "LI":
+                lower.append((columns[columnName], val)) #math.ceil(val)))
+            elif boundType == "FX":
+                lower.append((columns[columnName], val))
+                upper.append((columns[columnName], val))
+            elif boundType == "LO":
+                lower.append((columns[columnName], val)) #math.ceil(val)))
+            elif boundType == "UP":
+                lower.append((columns[columnName], val))
+            elif boundType == "UI":
+                upper.append((columns[columnName], val)) #math.floor(val)))
+            elif boundType == "FR":
+                upper.append((columns[columnName], sys.maxsize))
+                lower.append((columns[columnName], -sys.maxsize - 1))
+            elif boundType == "BV":
+                lower.append((columns[columnName], 0))
+                upper.append((columns[columnName], 1))
+            else:
+                raise Exception("Unknown boundType: " + boundType + " in line: " + line)
+        elif numSplits == 3:
+            boundType, _, columnName = line.split()
+            if boundType == "FR":
+                upper.append((columns[columnName], sys.maxsize))
+                lower.append((columns[columnName], -sys.maxsize - 1))
+            elif boundType == "MI":
+                lower.append((columns[columnName], -sys.maxsize - 1))
+            elif boundType == "PL":
+                upper.append((columns[columnName], sys.maxsize))
+            elif boundType == "BV":
+                lower.append((columns[columnName], 0))
+                upper.append((columns[columnName], 1))
+            else:
+                raise Exception("Unknown boundType: " + boundType + "i n line " + line)
+        else:
+            raise Exception("Could not parse bounds from the following line: " + line)
+
+    return make_lp(Aeq, Aineq, obj, rhsEq, rhsIneq, upper, lower)
 
